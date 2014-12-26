@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-export NODE_PATH=/Users/mitchellf/Developer/node-js-getting-started/nenv/lib/node_modules
-export NPM_CONFIG_PREFIX=/Users/mitchellf/Developer/node-js-getting-started/nenv
-export npm_config_prefix=/Users/mitchellf/Developer/node-js-getting-started/nenv
-exec nenv/bin/node "$@"
