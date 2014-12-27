@@ -52,7 +52,6 @@ io.on('connection', function(socket){
                         + " you played " + p1.move + " and your opponent played " + p2.move);
       io.to(p2.id).emit(JankenEvents.roundComplete, m2
                         + " you played " + p2.move + " and your opponent played " + p1.move);
-                       );
       moves = [];
     }
   });
