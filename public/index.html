@@ -4,6 +4,9 @@
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
   </head>
   <body>
+    <div>
+      <span id="num_players"></span> Players
+    </div>
     <ul id="moves"></ul>
     <form action="">
       <input type="radio" name="move" value="rock">Rock
@@ -26,8 +29,17 @@
         return false;
       });
 
+      socket.on('utility_message', function(msg){
+        $('#moves').append($('<li>').text(msg));
+      });
+
+      socket.on('num_players', function(value){
+        $('#num_players').text(value);
+      });
+
       socket.on('round_complete', function(msg){
         $('#moves').append($('<li>').text(msg));
+        $('#moves').append($('<br />'));
         $('#submit').removeAttr('disabled');
       });
     </script>

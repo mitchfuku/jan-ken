@@ -5,7 +5,9 @@ var io = require('socket.io')(http);
 
 var JankenEvents = {
   moveSend: 'move_send',
-  roundComplete: 'round_complete'
+  roundComplete: 'round_complete',
+  utilityMessage: 'utility_message',
+  numPlayers: 'num_players'
 };
 
 var winMsg = "You win!";
@@ -21,8 +23,13 @@ app.use('/static/js', express.static(__dirname + '/public'));
 app.use('/static/images', express.static(__dirname + '/public'));
 
 var moves = [];
+var room = 'default';
 io.on('connection', function(socket){
+  socket.join(room);
   clients.push(socket);
+  var roster = io.sockets.adapter.rooms[room];
+
+  io.to(room).emit(JankenEvents.numPlayers, Object.keys(roster).length);
 
   // Move send
   socket.on(JankenEvents.moveSend, function(id, move){
@@ -53,6 +60,7 @@ io.on('connection', function(socket){
       io.to(p2.id).emit(JankenEvents.roundComplete, m2
                         + " you played " + p2.move + " and your opponent played " + p1.move);
       moves = [];
+    } else {
     }
   });
 
@@ -62,6 +70,7 @@ io.on('connection', function(socket){
     if (index !== -1) {
       clients.splice(index, 1);
     }
+    io.to(room).emit(JankenEvents.numPlayers, Object.keys(roster).length);
   });
 });
 
