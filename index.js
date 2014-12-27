@@ -110,6 +110,21 @@ io.on('connection', function(socket){
         moves: []
       };
     }
+    
+    var numClientsInRoom = 
+      Object.keys(io.nsps['/'].adapter.rooms[roomName]).length;
+
+    if (numClientsInRoom === 1) {
+      io.to(roomName).emit(
+        JankenEvents.utilityMessage, 
+        "There is " + numClientsInRoom + " player in " + roomName
+      );
+    } else {
+      io.to(roomName).emit(
+        JankenEvents.utilityMessage, 
+        "There are " + numClientsInRoom + " players in " + roomName
+      );
+    }
   }
 
   function generateWinnerMessage(p1, p2) {
