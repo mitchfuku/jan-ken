@@ -1,20 +1,21 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.1.2",
-  "description": "A sample Node.js app using Express 4",
+  "name": "jan-ken",
+  "version": "0.0.1",
+  "description": "An app to play jan ken po (rock paper scissors) with your friends!",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "~4.9.x"
+    "express": "~4.9.x",
+    "socket.io": "^1.2.1"
   },
   "engines": {
     "node": "0.10.x"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/heroku/node-js-getting-started"
+    "url": "https://github.com/mitchfuku/jan-ken"
   },
   "keywords": [
     "node",
