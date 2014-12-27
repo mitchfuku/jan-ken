@@ -18,7 +18,7 @@
       <button id="submit">Submit</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="/static/js/jquery-1.11.2.min.js"></script>
 
     <script>
       var socket = io();
@@ -26,13 +26,13 @@
       $('#room-selection').submit(function(){
         var value = $("input[name=room]").val();
         socket.emit('join_room', value);
+        $('#submit').removeAttr('disabled');
         return false;
       });
 
       $('#game-action').submit(function(){
         var value = $("input[name=move]:checked").val();
         socket.emit('move_send', value);
-        $('#moves').append($('<li>').text("move submitted..."));
         $('#submit').attr('disabled','disabled');
         return false;
       });
@@ -46,7 +46,8 @@
       });
 
       socket.on('round_complete', function(msg){
-        $('#moves').append($('<li>').text(msg));
+        $('#moves').append($('<li>').text(msg[0]));
+        $('#moves').append($('<li>').text(msg[1]));
         $('#moves').append($('<br />'));
         $('#submit').removeAttr('disabled');
       });

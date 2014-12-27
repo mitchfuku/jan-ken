@@ -18,18 +18,14 @@ var JankenEvents = {
   joinRoom: 'join_room'
 };
 
-var winMsg = "You win!";
-var tieMsg = "It's a tie";
-var loseMsg = "You lose  :(";
-
 var clients = {};
-
 var rooms = {};
-var room = 'default';
+
 io.on('connection', function(socket){
   socket.nickname = sillyname();
   if (!socket.room) {
-    joinRoom(room);
+    var defaultRoom = 'default';
+    joinRoom(defaultRoom);
   }
 
   clients[socket.id] = socket;
@@ -46,27 +42,38 @@ io.on('connection', function(socket){
       move: move,
     });
 
-    if (rooms[socket.room].moves.length === 2) {
-      var p1 = rooms[socket.room].moves[0];
-      var p2 = rooms[socket.room].moves[1];
+    io.to(socket.room).emit(
+      JankenEvents.utilityMessage, 
+      socket.nickname + " has played a move"
+    );
+    var movesReadOnly = rooms[socket.room].moves;
+    if (movesReadOnly.length === 2) {
+      var p1 = movesReadOnly[0];
+      var p2 = movesReadOnly[1];
       var m1, m2;
 
       var whoWins = isMoveAWinner(p1.move, p2.move);
       if (whoWins === 0) {
-        m1 = loseMsg;
-        m2 = winMsg;
+        io.to(socket.room).emit(
+          JankenEvents.roundComplete, 
+          generateWinnerMessage(p1, p2)
+        );
       } else if (whoWins === 1) {
-        m1 = winMsg;
-        m2 = loseMsg;
+        io.to(socket.room).emit(
+          JankenEvents.roundComplete, 
+          generateWinnerMessage(p2, p1)
+        );
       } else {
-        m1 = tieMsg;
-        m2 = tieMsg;
+        io.to(socket.room).emit(
+          JankenEvents.roundComplete, 
+          [
+            "It's a tie!",
+            clients[p1.id].nickname + " and " + clients[p2.id].nickname +
+              " played " + p1.move
+          ]
+        );
       }
 
-      io.to(p1.id).emit(JankenEvents.roundComplete, m1 
-                        + " you played " + p1.move + " and your opponent played " + p2.move);
-      io.to(p2.id).emit(JankenEvents.roundComplete, m2
-                        + " you played " + p2.move + " and your opponent played " + p1.move);
       rooms[socket.room].moves = []
     } else {
     }
@@ -90,6 +97,7 @@ io.on('connection', function(socket){
   });
 
   function joinRoom(roomName) {
+    roomName = "" + roomName;
     socket.join(roomName);
     socket.room = roomName;
     io.to(roomName).emit(
@@ -102,6 +110,17 @@ io.on('connection', function(socket){
         moves: []
       };
     }
+  }
+
+  function generateWinnerMessage(p1, p2) {
+    var winnerNick = clients[p1.id].nickname;
+    return [
+      winnerNick + " wins!",
+      (
+        winnerNick + " played " + p1.move + " and " +
+        clients[p2.id].nickname + " played " + p2.move
+      )
+    ];
   }
 });
 
