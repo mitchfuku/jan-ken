@@ -48,8 +48,11 @@ io.on('connection', function(socket){
         m2 = tieMsg;
       }
 
-      io.to(p1.id).emit(JankenEvents.roundComplete, m1);
-      io.to(p2.id).emit(JankenEvents.roundComplete, m2);
+      io.to(p1.id).emit(JankenEvents.roundComplete, m1 
+                        + " you played " + p1.move + " and your opponent played " + p2.move);
+      io.to(p2.id).emit(JankenEvents.roundComplete, m2
+                        + " you played " + p2.move + " and your opponent played " + p1.move);
+                       );
       moves = [];
     }
   });

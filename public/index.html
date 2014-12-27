@@ -21,7 +21,7 @@
       $('form').submit(function(){
         var value = $("input[name=move]:checked").val();
         socket.emit('move_send', socket.io.engine.id, value);
-        $('#moves').append($('<li>').text(value));
+        $('#moves').append($('<li>').text("move submitted..."));
         $('#submit').attr('disabled','disabled');
         return false;
       });
