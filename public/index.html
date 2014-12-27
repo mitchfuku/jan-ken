@@ -5,7 +5,7 @@
   </head>
   <body>
     <div>
-      <span id="num_players"></span> Players
+      <span id="message"></span>
     </div>
     <ul id="moves"></ul>
     <form action="">
@@ -33,8 +33,8 @@
         $('#moves').append($('<li>').text(msg));
       });
 
-      socket.on('num_players', function(value){
-        $('#num_players').text(value);
+      socket.on('message', function(value){
+        $('#message').text(value);
       });
 
       socket.on('round_complete', function(msg){

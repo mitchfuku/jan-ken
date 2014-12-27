@@ -2,12 +2,13 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var sillyname = require('sillyname');
 
 var JankenEvents = {
   moveSend: 'move_send',
   roundComplete: 'round_complete',
   utilityMessage: 'utility_message',
-  numPlayers: 'num_players'
+  message: 'message'
 };
 
 var winMsg = "You win!";
@@ -25,11 +26,19 @@ app.use('/static/images', express.static(__dirname + '/public'));
 var moves = [];
 var room = 'default';
 io.on('connection', function(socket){
+  socket.nickname = sillyname();
   socket.join(room);
   clients.push(socket);
   var roster = io.sockets.adapter.rooms[room];
 
-  io.to(room).emit(JankenEvents.numPlayers, Object.keys(roster).length);
+  io.to(socket.id).emit(
+    JankenEvents.message, 
+    "Hello " + socket.nickname
+  );
+  io.to(room).emit(
+    JankenEvents.utilityMessage, 
+    socket.nickname + " has just joined"
+  );
 
   // Move send
   socket.on(JankenEvents.moveSend, function(id, move){
@@ -70,7 +79,10 @@ io.on('connection', function(socket){
     if (index !== -1) {
       clients.splice(index, 1);
     }
-    io.to(room).emit(JankenEvents.numPlayers, Object.keys(roster).length);
+    io.to(room).emit(
+      JankenEvents.utilityMessage, 
+      socket.nickname + " has left"
+    );
   });
 });
 
