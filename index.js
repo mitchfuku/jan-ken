@@ -4,52 +4,51 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var sillyname = require('sillyname');
 
-var JankenEvents = {
-  moveSend: 'move_send',
-  roundComplete: 'round_complete',
-  utilityMessage: 'utility_message',
-  message: 'message'
-};
-
-var winMsg = "You win!";
-var tieMsg = "It's a tie";
-var loseMsg = "You lose  :(";
-
-var clients = [];
-
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 app.use('/static/css', express.static(__dirname + '/public'));
 app.use('/static/js', express.static(__dirname + '/public'));
 app.use('/static/images', express.static(__dirname + '/public'));
 
-var moves = [];
+var JankenEvents = {
+  moveSend: 'move_send',
+  roundComplete: 'round_complete',
+  utilityMessage: 'utility_message',
+  message: 'message',
+  joinRoom: 'join_room'
+};
+
+var winMsg = "You win!";
+var tieMsg = "It's a tie";
+var loseMsg = "You lose  :(";
+
+var clients = {};
+
+var rooms = {};
 var room = 'default';
 io.on('connection', function(socket){
   socket.nickname = sillyname();
-  socket.join(room);
-  clients.push(socket);
-  var roster = io.sockets.adapter.rooms[room];
+  if (!socket.room) {
+    joinRoom(room);
+  }
+
+  clients[socket.id] = socket;
 
   io.to(socket.id).emit(
     JankenEvents.message, 
-    "Hello " + socket.nickname
-  );
-  io.to(room).emit(
-    JankenEvents.utilityMessage, 
-    socket.nickname + " has just joined"
+    "Hello " + socket.nickname + "!"
   );
 
   // Move send
-  socket.on(JankenEvents.moveSend, function(id, move){
-    moves.push({
-      id: id,
+  socket.on(JankenEvents.moveSend, function(move){
+    rooms[socket.room].moves.push({
+      id: socket.id,
       move: move,
-    })
+    });
 
-    if (moves.length === 2) {
-      var p1 = moves[0];
-      var p2 = moves[1];
+    if (rooms[socket.room].moves.length === 2) {
+      var p1 = rooms[socket.room].moves[0];
+      var p2 = rooms[socket.room].moves[1];
       var m1, m2;
 
       var whoWins = isMoveAWinner(p1.move, p2.move);
@@ -68,22 +67,42 @@ io.on('connection', function(socket){
                         + " you played " + p1.move + " and your opponent played " + p2.move);
       io.to(p2.id).emit(JankenEvents.roundComplete, m2
                         + " you played " + p2.move + " and your opponent played " + p1.move);
-      moves = [];
+      rooms[socket.room].moves = []
     } else {
     }
   });
 
+  // client join room
+  socket.on(JankenEvents.joinRoom, function(roomName) {
+    joinRoom(roomName);
+  });
+
   // client disconnect
   socket.on('disconnect', function() {
-    var index = clients.indexOf(socket);
-    if (index !== -1) {
-      clients.splice(index, 1);
+    if (clients[socket.id]) {
+      delete clients[socket.id];
     }
-    io.to(room).emit(
+
+    io.to(socket.room).emit(
       JankenEvents.utilityMessage, 
       socket.nickname + " has left"
     );
   });
+
+  function joinRoom(roomName) {
+    socket.join(roomName);
+    socket.room = roomName;
+    io.to(roomName).emit(
+      JankenEvents.utilityMessage, 
+      socket.nickname + " has just joined " + roomName
+    );
+
+    if (!rooms[roomName]) {
+      rooms[roomName] = {
+        moves: []
+      };
+    }
+  }
 });
 
 app.get('/', function(request, response) {

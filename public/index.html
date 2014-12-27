@@ -8,7 +8,10 @@
       <span id="message"></span>
     </div>
     <ul id="moves"></ul>
-    <form action="">
+    <form id="room-selection" action="">
+      Join a room <input type="text" name="room">
+    </form>
+    <form id="game-action" action="">
       <input type="radio" name="move" value="rock">Rock
       <input type="radio" name="move" value="paper">Paper
       <input type="radio" name="move" value="scissors">Scissors
@@ -19,11 +22,16 @@
 
     <script>
       var socket = io();
-      console.log(socket);
 
-      $('form').submit(function(){
+      $('#room-selection').submit(function(){
+        var value = $("input[name=room]").val();
+        socket.emit('join_room', value);
+        return false;
+      });
+
+      $('#game-action').submit(function(){
         var value = $("input[name=move]:checked").val();
-        socket.emit('move_send', socket.io.engine.id, value);
+        socket.emit('move_send', value);
         $('#moves').append($('<li>').text("move submitted..."));
         $('#submit').attr('disabled','disabled');
         return false;
