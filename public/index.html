@@ -3,15 +3,17 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/side.css">
   </head>
   <body>
     <div id="side">
       <h3>Room List</h3>
-      <div>
-        <form id="room-selection" action="">
-          Join a room <input type="text" name="room">
-        </form>
-      </div>
+      <form id="room-selection" action="">
+        Join a room <input type="text" name="room">
+      </form>
+      <p>
+        Or select a room from the list below to join:
+      </p>
       <ul id="room-list"></ul>
     </div>
     <div id="main">

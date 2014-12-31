@@ -1,26 +1,11 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+  font-weight: 300;
 }
 
 #main, #side {
   height: 100%;
-}
-
-#side {
-  position: fixed;
-  right: 0;
-  border-left: 1px solid black;
-  width: 240px;
   padding: 12px;
-}
-
-#room-list {
-  padding: 0;
-  margin: 12px 0;
-  list-style-type: none;
-}
-
-#room-list .room {
-  cursor: pointer;
 }
