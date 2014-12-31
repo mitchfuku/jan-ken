@@ -17,7 +17,8 @@ var JankenEvents = {
   roundComplete: 'round_complete',
   utilityMessage: 'utility_message',
   message: 'message',
-  joinRoom: 'join_room'
+  joinRoom: 'join_room',
+  updateRoomList: 'update_room_list'
 };
 
 var clients = {};
@@ -26,7 +27,7 @@ var rooms = {};
 io.on('connection', function(socket){
   socket.nickname = sillyname();
   if (!socket.room) {
-    var defaultRoom = 'default';
+    var defaultRoom = 'lobby';
     joinRoom(defaultRoom);
   }
 
@@ -34,7 +35,7 @@ io.on('connection', function(socket){
 
   io.to(socket.id).emit(
     JankenEvents.message, 
-    "Hello " + socket.nickname + "!"
+    "Hello! Your user name is " + socket.nickname + "."
   );
 
   // Move send
@@ -109,7 +110,8 @@ io.on('connection', function(socket){
 
     if (!rooms[roomName]) {
       rooms[roomName] = {
-        moves: []
+        moves: [],
+        name: roomName
       };
     }
     
@@ -127,6 +129,11 @@ io.on('connection', function(socket){
         "There are " + numClientsInRoom + " players in " + roomName
       );
     }
+
+    socket.emit(
+      JankenEvents.updateRoomList,
+      rooms
+    );
   }
 
   function generateWinnerMessage(p1, p2) {

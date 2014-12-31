@@ -1,23 +1,29 @@
 <!doctype html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
   </head>
   <body>
-    <div>
-      <span id="message"></span>
+    <div id="side">
+      <h3>Room List</h3>
+      <div>
+        <form id="room-selection" action="">
+          Join a room <input type="text" name="room">
+        </form>
+      </div>
+      <ul id="room-list"></ul>
     </div>
-    <ul id="moves"></ul>
-    <form id="room-selection" action="">
-      Join a room <input type="text" name="room">
-    </form>
-    <form id="game-action" action="">
-      <input type="radio" name="move" value="rock">Rock
-      <input type="radio" name="move" value="paper">Paper
-      <input type="radio" name="move" value="scissors">Scissors
-      <button id="submit">Submit</button>
-    </form>
+    <div id="main">
+      <div id="message"></div>
+      <ul id="moves"></ul>
+      <form id="game-action" action="">
+        <input type="radio" name="move" value="rock">Rock
+        <input type="radio" name="move" value="paper">Paper
+        <input type="radio" name="move" value="scissors">Scissors
+        <button id="submit">Submit</button>
+      </form>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/jquery-1.11.2.min.js"></script>
 
@@ -25,21 +31,41 @@
       var socket = io();
 
       $('#room-selection').submit(function(){
-        var value = $("input[name=room]").val();
-        socket.emit('join_room', value);
-        $('#submit').removeAttr('disabled');
+        var input = $("input[name=room]");
+        var value = input.val();
+
+        input.val('');
+        input.blur();
+        joinRoom(value);
+
         return false;
       });
 
       $('#game-action').submit(function(){
         var value = $("input[name=move]:checked").val();
-        socket.emit('move_send', value);
+        socket.emit('move_send', roomName);
         $('#submit').attr('disabled','disabled');
         return false;
       });
 
+      $('#room-list').on('click', function(e) {
+        joinRoom($(e.target).data().roomName);
+      });
+
       socket.on('utility_message', function(msg){
         $('#moves').append($('<li>').text(msg));
+      });
+
+      socket.on('update_room_list', function(rooms){
+        var roomList = $('#room-list');
+        roomList.empty();
+        $.each(
+          rooms,
+          function(room) {
+            var item = $('<li class="room">').text(room);
+            item.data({ roomName: room});
+            roomList.append(item);
+        });
       });
 
       socket.on('message', function(value){
@@ -52,6 +78,11 @@
         $('#moves').append($('<br />'));
         $('#submit').removeAttr('disabled');
       });
+
+      function joinRoom(roomName) {
+        socket.emit('join_room', roomName);
+        $('#submit').removeAttr('disabled');
+      }
     </script>
   </body>
 </html>
